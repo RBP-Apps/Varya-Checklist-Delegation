@@ -519,81 +519,108 @@ export default function AssignTask() {
 
   // Updated generateTasks function that only creates tasks for dates in the Working Day Calendar
   const generateTasks = async () => {
-    if (!date || selectedDoers.length === 0 || !formData.description || !formData.frequency) {
-      alert("Please fill in all required fields.");
-      return;
-    }
+  if (!date || selectedDoers.length === 0 || !formData.description || !formData.frequency) {
+    alert("Please fill in all required fields.");
+    return;
+  }
 
-    if (formData.frequency === "custom") {
-      const tasks = [];
+  // Fetch working days from the sheet
+  const workingDays = await fetchWorkingDays();
+  if (workingDays.length === 0) {
+    alert("Could not retrieve working days. Please make sure the Working Day Calendar sheet is properly set up.");
+    return;
+  }
 
-      // Create the specified number of tasks
-      for (let i = 0; i < customFrequencyCount; i++) {
-        selectedDoers.forEach(doer => {
-          tasks.push({
-            description: formData.description,
-            department: formData.department,
-            givenBy: formData.givenBy,
-            doer: doer,
-            dueDate: formatDateToDDMMYYYY(date), // Use the selected date for all tasks
-            status: "pending",
-            frequency: "custom",
-            enableReminders: formData.enableReminders,
-            requireAttachment: formData.requireAttachment,
-          });
-        });
+  // Sort the working days chronologically
+  const sortedWorkingDays = [...workingDays].sort((a, b) => {
+    const [dayA, monthA, yearA] = a.split('/').map(Number);
+    const [dayB, monthB, yearB] = b.split('/').map(Number);
+    return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
+  });
+
+  // Convert selected date to same format
+  const selectedDate = new Date(date);
+  const startDateStr = formatDateToDDMMYYYY(selectedDate);
+
+  // Filter out dates before the selected date (no back dates)
+  const futureDates = sortedWorkingDays.filter(dateStr => {
+    const [dateDay, month, year] = dateStr.split('/').map(Number);
+    const dateObj = new Date(year, month - 1, dateDay);
+    return dateObj >= selectedDate;
+  });
+
+  // If no future working days are available from the selected date
+  if (futureDates.length === 0) {
+    alert("No working days found on or after your selected date. Please choose a different start date or update the Working Day Calendar.");
+    return;
+  }
+
+  // Find the start date in working days
+  let startIndex = futureDates.findIndex(d => d === startDateStr);
+
+  // If the exact start date isn't found, use the next available working day
+  if (startIndex === -1) {
+    startIndex = 0; // Use the first available future working day
+    alert(`The selected date (${startDateStr}) is not in the Working Day Calendar. The next available working day will be used instead: ${futureDates[0]}`);
+  }
+
+  const tasks = [];
+
+  if (formData.frequency === "custom") {
+    // For custom frequency, generate tasks with incrementing dates
+    let currentIndex = startIndex;
+    
+    // Create the specified number of tasks with incrementing dates
+    for (let i = 0; i < customFrequencyCount; i++) {
+      // Check if we have enough working days
+      if (currentIndex >= futureDates.length) {
+        alert(`Only ${i} tasks could be generated due to limited working days in the calendar.`);
+        break;
       }
-
-      setGeneratedTasks(tasks);
-      setAccordionOpen(true);
-      return;
+      
+      const taskDateStr = futureDates[currentIndex];
+      
+      // Create a task for each selected doer
+      selectedDoers.forEach(doer => {
+        tasks.push({
+          description: formData.description,
+          department: formData.department,
+          givenBy: formData.givenBy,
+          doer: doer,
+          dueDate: taskDateStr,
+          status: "pending",
+          frequency: "custom",
+          enableReminders: formData.enableReminders,
+          requireAttachment: formData.requireAttachment,
+        });
+      });
+      
+      // Move to the next working day for the next task
+      currentIndex += 1;
     }
-
-    // Fetch working days from the sheet
-    const workingDays = await fetchWorkingDays();
-    if (workingDays.length === 0) {
-      alert("Could not retrieve working days. Please make sure the Working Day Calendar sheet is properly set up.");
-      return;
-    }
-
-    // Sort the working days chronologically
-    const sortedWorkingDays = [...workingDays].sort((a, b) => {
-      const [dayA, monthA, yearA] = a.split('/').map(Number);
-      const [dayB, monthB, yearB] = b.split('/').map(Number);
-      return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
-    });
-
-    // Convert selected date to same format
-    const selectedDate = new Date(date);
-
-    // Filter out dates before the selected date (no back dates)
-    const futureDates = sortedWorkingDays.filter(dateStr => {
-      const [dateDay, month, year] = dateStr.split('/').map(Number);
-      const dateObj = new Date(year, month - 1, dateDay);
-      return dateObj >= selectedDate;
-    });
-
-    // If no future working days are available from the selected date
-    if (futureDates.length === 0) {
-      alert("No working days found on or after your selected date. Please choose a different start date or update the Working Day Calendar.");
-      return;
-    }
-
-    // Find the start date in working days
-    const startDateStr = formatDateToDDMMYYYY(selectedDate);
-    let startIndex = futureDates.findIndex(d => d === startDateStr);
-
-    // If the exact start date isn't found, use the next available working day
-    if (startIndex === -1) {
-      startIndex = 0; // Use the first available future working day
-      alert(`The selected date (${startDateStr}) is not in the Working Day Calendar. The next available working day will be used instead: ${futureDates[0]}`);
-    }
-
-    const tasks = [];
-
+  } else if (formData.frequency === "one-time") {
     // For one-time tasks, just use the first available date
-    if (formData.frequency === "one-time") {
-      const taskDateStr = futureDates[startIndex];
+    const taskDateStr = futureDates[startIndex];
+
+    // Create a task for each selected doer
+    selectedDoers.forEach(doer => {
+      tasks.push({
+        description: formData.description,
+        department: formData.department,
+        givenBy: formData.givenBy,
+        doer: doer,
+        dueDate: taskDateStr,
+        status: "pending",
+        frequency: formData.frequency,
+        enableReminders: formData.enableReminders,
+        requireAttachment: formData.requireAttachment,
+      });
+    });
+  } else {
+    // For other recurring tasks (existing logic)
+    let currentIndex = startIndex;
+    while (currentIndex < futureDates.length) {
+      const taskDateStr = futureDates[currentIndex];
 
       // Create a task for each selected doer
       selectedDoers.forEach(doer => {
@@ -601,7 +628,7 @@ export default function AssignTask() {
           description: formData.description,
           department: formData.department,
           givenBy: formData.givenBy,
-          doer: doer, // Individual doer
+          doer: doer,
           dueDate: taskDateStr,
           status: "pending",
           frequency: formData.frequency,
@@ -609,50 +636,30 @@ export default function AssignTask() {
           requireAttachment: formData.requireAttachment,
         });
       });
-    } else {
-      // For recurring tasks
-      let currentIndex = startIndex;
-      while (currentIndex < futureDates.length) {
-        const taskDateStr = futureDates[currentIndex];
 
-        // Create a task for each selected doer
-        selectedDoers.forEach(doer => {
-          tasks.push({
-            description: formData.description,
-            department: formData.department,
-            givenBy: formData.givenBy,
-            doer: doer, // Individual doer
-            dueDate: taskDateStr,
-            status: "pending",
-            frequency: formData.frequency,
-            enableReminders: formData.enableReminders,
-            requireAttachment: formData.requireAttachment,
-          });
-        });
+      // Determine the next index based on frequency
+      switch (formData.frequency) {
+        case "daily": {
+          currentIndex += 1; // Next working day
+          break;
+        }
+        case "weekly": {
+          // Find a working day approximately 7 calendar days later
+          const [taskDay, taskMonth, taskYear] = taskDateStr.split('/').map(Number);
+          const currentDate = new Date(taskYear, taskMonth - 1, taskDay);
+          const targetDate = addDays(currentDate, 7);
+          const targetDateStr = formatDateToDDMMYYYY(targetDate);
 
-        // Determine the next index based on frequency
-        switch (formData.frequency) {
-          case "daily": {
-            currentIndex += 1; // Next working day
-            break;
+          // Find the next working day closest to the target date
+          const nextIndex = findClosestWorkingDayIndex(futureDates, targetDateStr);
+          // Only continue if we found a valid next date (not -1) and it's greater than current
+          if (nextIndex !== -1 && nextIndex > currentIndex) {
+            currentIndex = nextIndex;
+          } else {
+            currentIndex = futureDates.length; // Exit the loop
           }
-          case "weekly": {
-            // Find a working day approximately 7 calendar days later
-            const [taskDay, taskMonth, taskYear] = taskDateStr.split('/').map(Number);
-            const currentDate = new Date(taskYear, taskMonth - 1, taskDay);
-            const targetDate = addDays(currentDate, 7);
-            const targetDateStr = formatDateToDDMMYYYY(targetDate);
-
-            // Find the next working day closest to the target date
-            const nextIndex = findClosestWorkingDayIndex(futureDates, targetDateStr);
-            // Only continue if we found a valid next date (not -1) and it's greater than current
-            if (nextIndex !== -1 && nextIndex > currentIndex) {
-              currentIndex = nextIndex;
-            } else {
-              currentIndex = futureDates.length; // Exit the loop
-            }
-            break;
-          }
+          break;
+        }
           case "fortnightly": {
             // Find a working day approximately 14 calendar days later
             const [taskDay2, taskMonth2, taskYear2] = taskDateStr.split('/').map(Number);
