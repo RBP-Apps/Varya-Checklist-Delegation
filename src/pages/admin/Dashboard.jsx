@@ -110,7 +110,7 @@ export default function AdminDashboard() {
       } else {
         // Task is not completed
         pendingTasks++; // All incomplete tasks count as pending
-       
+
         if (task.status === 'overdue') {
           overdueTasks++; // Only past dates (excluding today) count as overdue
         }
@@ -251,8 +251,8 @@ export default function AdminDashboard() {
     try {
       // Debug: Log which sheet we're fetching
       console.log(`Fetching data for dashboard type: ${dashboardType}, sheet: ${sheetName}`);
-     
-      const response = await fetch(`https://docs.google.com/spreadsheets/d/1nvU1bQOkLNMwatRSbcTPJd0vhDGeqrhY8gL1s0YWGww/gviz/tq?tqx=out:json&sheet=${sheetName}`);
+
+      const response = await fetch(`https://docs.google.com/spreadsheets/d/1WIxX_wOaCYeOc96Jhghkv6YEtWrhpM0J7kjoDRZ-fwg/gviz/tq?tqx=out:json&sheet=${sheetName}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch ${sheetName} sheet data: ${response.status}`);
@@ -351,15 +351,15 @@ export default function AdminDashboard() {
 
         // Check column B for valid task row - "Task ID"
         const taskId = getCellValue(row, 1); // Column B (index 1)
-       
+
         // Debug: Log task ID for first few rows
         if (rowIndex <= 5) {
           console.log(`Row ${rowIndex + 1}: taskId="${taskId}" (type: ${typeof taskId})`);
         }
-       
+
         // More lenient validation - allow any non-empty value as task ID
         if (taskId === null || taskId === undefined || taskId === '' ||
-            (typeof taskId === 'string' && taskId.trim() === '')) {
+          (typeof taskId === 'string' && taskId.trim() === '')) {
           if (rowIndex <= 5) console.log(`Row ${rowIndex + 1}: Skipped due to empty/null task ID`);
           return null;
         }
@@ -380,18 +380,18 @@ export default function AdminDashboard() {
         if (dashboardType === "delegation") {
           // For DELEGATION mode: Process ALL tasks with valid task IDs, no date filtering
           if (!taskId || taskId === null || taskId === undefined || taskId === '' ||
-              (typeof taskId === 'string' && taskId.trim() === '')) {
+            (typeof taskId === 'string' && taskId.trim() === '')) {
             if (rowIndex <= 5) console.log(`Row ${rowIndex + 1}: Skipped due to invalid task ID in delegation mode`);
             return null;
           }
         } else {
           // For CHECKLIST mode: Keep existing date filtering logic
           const taskStartDateObj = parseDateFromDDMMYYYY(taskStartDate);
-          
+
           if (rowIndex <= 5) {
             console.log(`Row ${rowIndex + 1}: taskStartDateObj=${taskStartDateObj}, today=${today}, tomorrow=${tomorrow}, isValid=${!!taskStartDateObj}`);
           }
-          
+
           // Process tasks that have a valid start date and are due up to tomorrow (include tomorrow's tasks)
           if (!taskStartDateObj || taskStartDateObj > tomorrow) {
             if (rowIndex <= 5) console.log(`Row ${rowIndex + 1}: Skipped due to invalid/far future date (beyond tomorrow)`);
@@ -408,7 +408,7 @@ export default function AdminDashboard() {
           // For checklist: Column K (index 10) - "Actual"
           completionDateValue = getCellValue(row, 10);
         }
-       
+
         completionDate = completionDateValue ? parseGoogleSheetsDate(String(completionDateValue)) : '';
 
         // Debug: Log completion date for first few rows
@@ -430,10 +430,10 @@ export default function AdminDashboard() {
         // Get additional task details
         const taskDescription = getCellValue(row, 5) || 'Untitled Task'; // Column F - "Task Description"
         const frequency = getCellValue(row, 7) || 'one-time'; // Column H - "Freq"
-       
+
         // UPDATED: Determine task status for display purposes - restored overdue logic for delegation
         let status = 'pending';
-       
+
         if (completionDate && completionDate !== '') {
           status = 'completed';
         } else if (isDateInPast(taskStartDate) && !isDateToday(taskStartDate)) {
@@ -500,13 +500,13 @@ export default function AdminDashboard() {
           } else {
             // Task is not completed - apply counting logic for both modes
             staffData.pendingTasks++;
-           
+
             if (isDateInPast(taskStartDate) && !isDateToday(taskStartDate)) {
               // Past dates (excluding today) = overdue
               overdueTasks++;
               statusData.Overdue++;
             }
-           
+
             // All incomplete tasks (including overdue + today) = pending
             pendingTasks++;
             statusData.Pending++;
@@ -521,7 +521,7 @@ export default function AdminDashboard() {
           // For CHECKLIST mode: Keep existing logic with date restrictions
           const taskStartDateObj = parseDateFromDDMMYYYY(taskStartDate);
           const shouldCountInStats = taskStartDateObj <= today;
-          
+
           if (shouldCountInStats) {
             totalTasks++;
 
@@ -540,13 +540,13 @@ export default function AdminDashboard() {
               }
             } else {
               staffData.pendingTasks++;
-             
+
               if (isDateInPast(taskStartDate) && !isDateToday(taskStartDate)) {
                 // Past dates (excluding today) = overdue
                 overdueTasks++;
                 statusData.Overdue++;
               }
-             
+
               // All incomplete tasks (including overdue + today) = pending
               pendingTasks++;
               statusData.Pending++;
@@ -1145,7 +1145,7 @@ export default function AdminDashboard() {
               <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-100 p-4">
                 <h3 className="text-purple-700 font-medium">MIS Report</h3>
                 <p className="text-purple-600 text-sm">
-                  {dashboardType === "delegation" 
+                  {dashboardType === "delegation"
                     ? "Detailed delegation analytics - all tasks from sheet data"
                     : "Detailed task analytics and performance metrics"
                   }
@@ -1196,8 +1196,8 @@ export default function AdminDashboard() {
                     <div className="space-y-2">
                       <div className="text-sm font-medium text-purple-600">Total Tasks Assigned</div>
                       <div className="text-3xl font-bold text-purple-700">
-                        {dashboardType === "delegation" 
-                          ? departmentData.totalTasks 
+                        {dashboardType === "delegation"
+                          ? departmentData.totalTasks
                           : (dateRange.filtered ? filteredDateStats.totalTasks : departmentData.totalTasks)
                         }
                       </div>
@@ -1214,8 +1214,8 @@ export default function AdminDashboard() {
                     <div className="space-y-2">
                       <div className="text-sm font-medium text-purple-600">Tasks Completed</div>
                       <div className="text-3xl font-bold text-purple-700">
-                        {dashboardType === "delegation" 
-                          ? departmentData.completedTasks 
+                        {dashboardType === "delegation"
+                          ? departmentData.completedTasks
                           : (dateRange.filtered ? filteredDateStats.completedTasks : departmentData.completedTasks)
                         }
                       </div>
@@ -1225,17 +1225,17 @@ export default function AdminDashboard() {
                         {dashboardType === "delegation" ? "Tasks Pending" : "Tasks Pending/Overdue"}
                       </div>
                       <div className="text-3xl font-bold text-purple-700">
-                        {dashboardType === "delegation" 
-                          ? departmentData.pendingTasks 
-                          : (dateRange.filtered 
-                              ? `${filteredDateStats.pendingTasks} / ${filteredDateStats.overdueTasks}` 
-                              : `${departmentData.pendingTasks} / ${departmentData.overdueTasks}`
-                            )
+                        {dashboardType === "delegation"
+                          ? departmentData.pendingTasks
+                          : (dateRange.filtered
+                            ? `${filteredDateStats.pendingTasks} / ${filteredDateStats.overdueTasks}`
+                            : `${departmentData.pendingTasks} / ${departmentData.overdueTasks}`
+                          )
                         }
                       </div>
                       <div className="text-xs text-purple-600">
-                        {dashboardType === "delegation" 
-                          ? "All incomplete tasks" 
+                        {dashboardType === "delegation"
+                          ? "All incomplete tasks"
                           : "Pending (all incomplete) / Overdue (past dates only)"
                         }
                       </div>
@@ -1299,8 +1299,8 @@ export default function AdminDashboard() {
                         <h4 className="text-sm font-medium text-purple-700 mb-2">Completion Rate</h4>
                         <div className="flex items-center gap-4">
                           <div className="text-2xl font-bold text-purple-700">
-                            {dashboardType === "delegation" 
-                              ? departmentData.completionRate 
+                            {dashboardType === "delegation"
+                              ? departmentData.completionRate
                               : (dateRange.filtered ? filteredDateStats.completionRate : departmentData.completionRate)
                             }%
                           </div>
@@ -1309,21 +1309,21 @@ export default function AdminDashboard() {
                               <div
                                 className="h-full rounded-full flex items-center justify-end px-3 text-xs font-medium text-white"
                                 style={{
-                                  width: `${dashboardType === "delegation" 
-                                    ? departmentData.completionRate 
+                                  width: `${dashboardType === "delegation"
+                                    ? departmentData.completionRate
                                     : (dateRange.filtered ? filteredDateStats.completionRate : departmentData.completionRate)
-                                  }%`,
-                                  background: `linear-gradient(to right, #10b981 ${(dashboardType === "delegation" 
-                                    ? departmentData.completionRate 
+                                    }%`,
+                                  background: `linear-gradient(to right, #10b981 ${(dashboardType === "delegation"
+                                    ? departmentData.completionRate
                                     : (dateRange.filtered ? filteredDateStats.completionRate : departmentData.completionRate)
-                                  ) * 0.8}%, #f59e0b ${(dashboardType === "delegation" 
-                                    ? departmentData.completionRate 
+                                  ) * 0.8}%, #f59e0b ${(dashboardType === "delegation"
+                                    ? departmentData.completionRate
                                     : (dateRange.filtered ? filteredDateStats.completionRate : departmentData.completionRate)
                                   ) * 0.8}%)`
                                 }}
                               >
-                                {dashboardType === "delegation" 
-                                  ? departmentData.completionRate 
+                                {dashboardType === "delegation"
+                                  ? departmentData.completionRate
                                   : (dateRange.filtered ? filteredDateStats.completionRate : departmentData.completionRate)
                                 }%
                               </div>
@@ -1349,7 +1349,7 @@ export default function AdminDashboard() {
               <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-100 p-4">
                 <h3 className="text-purple-700 font-medium">Staff Performance</h3>
                 <p className="text-purple-600 text-sm">
-                  {dashboardType === "delegation" 
+                  {dashboardType === "delegation"
                     ? "Task completion rates by staff member (all delegation sheet data)"
                     : "Task completion rates by staff member (tasks up to today only)"
                   }
@@ -1372,7 +1372,7 @@ export default function AdminDashboard() {
                               <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 border-b border-green-200">
                                 <h3 className="text-lg font-medium text-green-700">Top Performers</h3>
                                 <p className="text-sm text-green-600">
-                                  {dashboardType === "delegation" 
+                                  {dashboardType === "delegation"
                                     ? "Staff with high task completion rates (all delegation data)"
                                     : "Staff with high task completion rates (tasks up to today only)"
                                   }
@@ -1414,7 +1414,7 @@ export default function AdminDashboard() {
                               <div className="p-4 bg-gradient-to-r from-yellow-50 to-yellow-100 border-b border-yellow-200">
                                 <h3 className="text-lg font-medium text-yellow-700">Average Performers</h3>
                                 <p className="text-sm text-yellow-600">
-                                  {dashboardType === "delegation" 
+                                  {dashboardType === "delegation"
                                     ? "Staff with moderate task completion rates (all delegation data)"
                                     : "Staff with moderate task completion rates (tasks up to today only)"
                                   }
@@ -1456,7 +1456,7 @@ export default function AdminDashboard() {
                               <div className="p-4 bg-gradient-to-r from-red-50 to-red-100 border-b border-red-200">
                                 <h3 className="text-lg font-medium text-red-700">Needs Improvement</h3>
                                 <p className="text-sm text-red-600">
-                                  {dashboardType === "delegation" 
+                                  {dashboardType === "delegation"
                                     ? "Staff with lower task completion rates (all delegation data)"
                                     : "Staff with lower task completion rates (tasks up to today only)"
                                   }
@@ -1499,7 +1499,7 @@ export default function AdminDashboard() {
                                 <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                                   <h3 className="text-lg font-medium text-gray-700">No Tasks Assigned</h3>
                                   <p className="text-sm text-gray-600">
-                                    {dashboardType === "delegation" 
+                                    {dashboardType === "delegation"
                                       ? "Staff with no tasks in delegation sheet"
                                       : "Staff with no tasks assigned for current period"
                                     }
@@ -1521,7 +1521,7 @@ export default function AdminDashboard() {
                                             <div>
                                               <p className="font-medium text-gray-700">{staff.name}</p>
                                               <p className="text-xs text-gray-600">
-                                                {dashboardType === "delegation" 
+                                                {dashboardType === "delegation"
                                                   ? "No tasks in delegation sheet"
                                                   : "No tasks assigned up to today"
                                                 }

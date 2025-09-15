@@ -35,13 +35,13 @@ const LoginPage = () => {
   // Fetch master data on component mount
   useEffect(() => {
     const fetchMasterData = async () => {
-      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxDEgWct4VVx7Oh81zMxwl1UsvretjqrCy9X7XlOoIqy9LXmGAAIlx-6Wvx3dZha0Xr/exec"
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_2rGoYWDROkUQmU7pBQWR_aNjqwn1LjZ5cSYdFtRgxGU9gp9jO29cXUUNpHXeJ6Mj/exec"
 
       try {
         setIsDataLoading(true)
 
         // Get the spreadsheet ID from your Apps Script
-        const SPREADSHEET_ID = "1nvU1bQOkLNMwatRSbcTPJd0vhDGeqrhY8gL1s0YWGww"
+        const SPREADSHEET_ID = "1WIxX_wOaCYeOc96Jhghkv6YEtWrhpM0J7kjoDRZ-fwg"
 
         // Construct the URL to read the sheet data directly
         const sheetUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=master`
@@ -298,8 +298,8 @@ const LoginPage = () => {
       {/* Toast Notification */}
       {toast.show && (
         <div className={`fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 ${toast.type === "success"
-            ? "bg-green-100 text-green-800 border-l-4 border-green-500"
-            : "bg-red-100 text-red-800 border-l-4 border-red-500"
+          ? "bg-green-100 text-green-800 border-l-4 border-green-500"
+          : "bg-red-100 text-red-800 border-l-4 border-red-500"
           }`}>
           {toast.message}
         </div>
