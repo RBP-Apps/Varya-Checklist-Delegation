@@ -1247,166 +1247,184 @@ function AccountDataPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredAccountData.length > 0 ? (
-                      filteredAccountData.map((account) => {
-                        const isSelected = selectedItems.has(account._id)
-                        return (
-                          <tr key={account._id} className={`${isSelected ? "bg-purple-50" : ""} hover:bg-gray-50`}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <input
-                                type="checkbox"
-                                className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                                checked={isSelected}
-                                onChange={(e) => handleCheckboxClick(e, account._id)}
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{account["col1"] || "—"}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{account["col2"] || "—"}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{account["col3"] || "—"}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{account["col4"] || "—"}</div>
-                            </td>
-                            <td className="px-6 py-4">
-                                      <div className="text-sm text-gray-900 max-w-xs truncate" title={account["col5"]}>
-                                        {account["col5"] || "—"}
-                                      </div>
-                                    </td>
-                                    {/* NEW ATTACHED FILE COLUMN */}
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                      {account["col15"] ? (
-                                        <a
-                                          href={account["col15"]}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 underline"
-                                        >
-                                          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                                          </svg>
-                                          View File
-                                        </a>
-                                      ) : (
-                                        <span className="text-sm text-gray-400">—</span>
-                                      )}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap bg-yellow-50">
-                                      <div className="text-sm text-gray-900">{account["col6"] || "—"}</div>
-                                    </td>
+                 <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredAccountData.length > 0 ? (
+                    filteredAccountData.map((account) => {
+                      const isSelected = selectedItems.has(account._id)
+                      return (
+                        <tr key={account._id} className={`${isSelected ? "bg-purple-50" : ""} hover:bg-gray-50`}>
+                          
+                          {/* Checkbox */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                              checked={isSelected}
+                              onChange={(e) => handleCheckboxClick(e, account._id)}
+                            />
+                          </td>
 
-                            <td className="px-6 py-4 whitespace-nowrap bg-yellow-50">
-                              <div className="text-sm text-gray-900">{account["col6"] || "—"}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{account["col7"] || "—"}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{account["col8"] || "—"}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{account["col9"] || "—"}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap bg-yellow-50">
-                              <select
-                                disabled={!isSelected}
-                                value={additionalData[account._id] || ""}
-                                onChange={(e) => {
-                                  setAdditionalData((prev) => ({ ...prev, [account._id]: e.target.value }))
-                                  if (e.target.value !== "No") {
-                                    setRemarksData((prev) => {
-                                      const newData = { ...prev }
-                                      delete newData[account._id]
-                                      return newData
-                                    })
-                                  }
-                                }}
-                                className="border border-gray-300 rounded-md px-2 py-1 w-full disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          {/* Task ID - col1 */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{account["col1"] || "—"}</div>
+                          </td>
+
+                          {/* Project - col2 */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{account["col2"] || "—"}</div>
+                          </td>
+
+                          {/* Given By - col3 */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{account["col3"] || "—"}</div>
+                          </td>
+
+                          {/* Name - col4 */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{account["col4"] || "—"}</div>
+                          </td>
+
+                          {/* Task Description - col5 */}
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900 max-w-xs truncate" title={account["col5"]}>
+                              {account["col5"] || "—"}
+                            </div>
+                          </td>
+
+                          {/* ATTACHED FILE - col15 (FIXED: this was missing proper mapping) */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {account["col15"] ? (
+                              <a
+                                href={account["col15"]}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 underline"
                               >
-                                <option value="">Select...</option>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
-                              </select>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap bg-orange-50">
-                              <input
-                                type="text"
-                                placeholder="Enter remarks"
-                                disabled={!isSelected || !additionalData[account._id]}
-                                value={remarksData[account._id] || ""}
-                                onChange={(e) => setRemarksData((prev) => ({ ...prev, [account._id]: e.target.value }))}
-                                className="border rounded-md px-2 py-1 w-full border-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap bg-green-50">
-                              {account.image ? (
-                                <div className="flex items-center">
-                                  <img
-                                    src={
-                                      typeof account.image === "string"
-                                        ? account.image
-                                        : URL.createObjectURL(account.image)
-                                    }
-                                    alt="Receipt"
-                                    className="h-10 w-10 object-cover rounded-md mr-2"
-                                  />
-                                  <div className="flex flex-col">
-                                    <span className="text-xs text-gray-500">
-                                      {account.image instanceof File ? account.image.name : "Uploaded Receipt"}
-                                    </span>
-                                    {account.image instanceof File ? (
-                                      <span className="text-xs text-green-600">Ready to upload</span>
-                                    ) : (
-                                      <button
-                                        className="text-xs text-purple-600 hover:text-purple-800"
-                                        onClick={() => window.open(account.image, "_blank")}
-                                      >
-                                        View Full Image
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              ) : (
-                                <label
-                                  className={`flex items-center cursor-pointer ${account["col9"]?.toUpperCase() === "YES" ? "text-red-600 font-medium" : "text-purple-600"} hover:text-purple-800`}
-                                >
-                                  <Upload className="h-4 w-4 mr-1" />
-                                  <span className="text-xs">
-                                    {account["col9"]?.toUpperCase() === "YES"
-                                      ? "Required Upload"
-                                      : "Upload Receipt Image"}
-                                    {account["col9"]?.toUpperCase() === "YES" && (
-                                      <span className="text-red-500 ml-1">*</span>
-                                    )}
+                                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                                View File
+                              </a>
+                            ) : (
+                              <span className="text-sm text-gray-400">—</span>
+                            )}
+                          </td>
+
+                          {/* Task Start Date - col6 (DATE COLUMN) */}
+                          <td className="px-6 py-4 whitespace-nowrap bg-yellow-50">
+                            <div className="text-sm text-gray-900">{account["col6"] || "—"}</div>
+                          </td>
+
+                          {/* Freq - col7 */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{account["col7"] || "—"}</div>
+                          </td>
+
+                          {/* Enable Reminders - col8 */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{account["col8"] || "—"}</div>
+                          </td>
+
+                          {/* Require Attachment - col9 */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{account["col9"] || "—"}</div>
+                          </td>
+
+                          {/* Status - (FIXED: Using form dropdown instead of column data) */}
+                          <td className="px-6 py-4 whitespace-nowrap bg-yellow-50">
+                            <select
+                              disabled={!isSelected}
+                              value={additionalData[account._id] || ""}
+                              onChange={(e) => {
+                                setAdditionalData((prev) => ({ ...prev, [account._id]: e.target.value }))
+                                if (e.target.value !== "No") {
+                                  setRemarksData((prev) => {
+                                    const newData = { ...prev }
+                                    delete newData[account._id]
+                                    return newData
+                                  })
+                                }
+                              }}
+                              className="border border-gray-300 rounded-md px-2 py-1 w-full disabled:bg-gray-100 disabled:cursor-not-allowed"
+                            >
+                              <option value="">Select...</option>
+                              <option value="Yes">Yes</option>
+                              <option value="No">No</option>
+                            </select>
+                          </td>
+
+                          {/* Remarks - (FIXED: Using form input instead of column data) */}
+                          <td className="px-6 py-4 whitespace-nowrap bg-orange-50">
+                            <input
+                              type="text"
+                              placeholder="Enter remarks"
+                              disabled={!isSelected || !additionalData[account._id]}
+                              value={remarksData[account._id] || ""}
+                              onChange={(e) => setRemarksData((prev) => ({ ...prev, [account._id]: e.target.value }))}
+                              className="border rounded-md px-2 py-1 w-full border-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                            />
+                          </td>
+
+                          {/* Upload Image - (FIXED: Using file upload instead of column data) */}
+                          <td className="px-6 py-4 whitespace-nowrap bg-green-50">
+                            {account.image ? (
+                              <div className="flex items-center">
+                                <img
+                                  src={typeof account.image === "string" ? account.image : URL.createObjectURL(account.image)}
+                                  alt="Receipt"
+                                  className="h-10 w-10 object-cover rounded-md mr-2"
+                                />
+                                <div className="flex flex-col">
+                                  <span className="text-xs text-gray-500">
+                                    {account.image instanceof File ? account.image.name : "Uploaded Receipt"}
                                   </span>
-                                  <input
-                                    type="file"
-                                    className="hidden"
-                                    accept="image/*"
-                                    onChange={(e) => handleImageUpload(account._id, e)}
-                                    disabled={!isSelected}
-                                  />
-                                </label>
-                              )}
-                            </td>
-                          </tr>
-                        )
-                      })
-                    ) : (
-                      <tr>
-                        <td colSpan={14} className="px-6 py-4 text-center text-gray-500">
-                          {searchTerm || selectedGivenBy.length > 0 || selectedNames.length > 0
-                            ? "No tasks matching your search or filters"
-                            : "No pending tasks found for today, tomorrow, or past due dates"}
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
+                                  {account.image instanceof File ? (
+                                    <span className="text-xs text-green-600">Ready to upload</span>
+                                  ) : (
+                                    <button
+                                      className="text-xs text-purple-600 hover:text-purple-800"
+                                      onClick={() => window.open(account.image, "_blank")}
+                                    >
+                                      View Full Image
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            ) : (
+                              <label
+                                className={`flex items-center cursor-pointer ${
+                                  account["col9"]?.toUpperCase() === "YES" ? "text-red-600 font-medium" : "text-purple-600"
+                                } hover:text-purple-800`}
+                              >
+                                <Upload className="h-4 w-4 mr-1" />
+                                <span className="text-xs">
+                                  {account["col9"]?.toUpperCase() === "YES" ? "Required Upload" : "Upload Receipt Image"}
+                                  {account["col9"]?.toUpperCase() === "YES" && <span className="text-red-500 ml-1">*</span>}
+                                </span>
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  accept="image/*"
+                                  onChange={(e) => handleImageUpload(account._id, e)}
+                                  disabled={!isSelected}
+                                />
+                              </label>
+                            )}
+                          </td>
+                        </tr>
+                      )
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan="14" className="px-6 py-4 text-center text-gray-500">
+                        {searchTerm || selectedGivenBy.length > 0 || selectedNames.length > 0
+                          ? "No tasks matching your search or filters"
+                          : "No pending tasks found for today, tomorrow, or past due dates"}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+
                 </table>
               </div>
             </>

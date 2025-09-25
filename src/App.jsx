@@ -11,6 +11,7 @@ import AdminDataPage from "./pages/admin/admin-data-page"
 import TrainingVideo from "./pages/TrainingVideo"
 import License from "./pages/License"
 import AccountDataPage from "./pages/delegation"
+import ScoringPage from "./pages/Scoring"
 import "./index.css"
 
 // Auth wrapper component to protect routes
@@ -111,6 +112,14 @@ function App() {
           }
         />
          <Route
+          path="/dashboard/scoring"
+          element={
+            <ProtectedRoute>
+              <ScoringPage />
+            </ProtectedRoute>
+          }
+        />
+         <Route
           path="/dashboard/license"
           element={
             <ProtectedRoute>
@@ -143,6 +152,7 @@ function App() {
         <Route path="/admin/dashboard" element={<Navigate to="/dashboard/admin" replace />} />
         <Route path="/admin/assign-task" element={<Navigate to="/dashboard/assign-task" replace />} />
         <Route path="/admin/data/:category" element={<Navigate to="/dashboard/data/:category" replace />} />
+        <Route path="/admin/scoring" element={<Navigate to="/dashboard/scoring" replace />} />
         <Route path="/admin/license" element={<Navigate to="/dashboard/license" replace />} />
         <Route path="/admin/traning-video" element={<Navigate to="/dashboard/traning-video" replace />} />
         <Route path="/user/*" element={<Navigate to="/dashboard/admin" replace />} />

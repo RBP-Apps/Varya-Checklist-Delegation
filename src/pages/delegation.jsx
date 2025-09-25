@@ -1137,21 +1137,18 @@ const handleSelectAllItems = useCallback(
   </tr>
 </thead>
 
-   <tbody className="bg-white divide-y divide-gray-200">
+ <tbody className="bg-white divide-y divide-gray-200">
   {filteredAccountData.length > 0 ? (
     filteredAccountData.map((account) => {
       const isSelected = selectedItems.has(account._id)
       const rowColorClass = getRowColor(account["col17"])
-      const isDisabled = account.isDisabled  // ← ADD THIS
-      const isComplete = account.status === "Complete"  // ← ADD THIS
+      const isDisabled = account.isDisabled
+      const isComplete = account.status === "Complete"
       
       return (
-        <tr
-          key={account._id}
-          className={`${isSelected ? "bg-purple-50" : ""} hover:bg-gray-50 ${rowColorClass} ${
-            isDisabled ? "opacity-70 bg-gray-50" : ""
-          }`}
-        >
+        <tr key={account._id} className={`${isSelected ? "bg-purple-50" : ""} hover:bg-gray-50 ${rowColorClass} ${isDisabled ? "opacity-70 bg-gray-50" : ""}`}>
+          
+          {/* Checkbox */}
           <td className="px-6 py-4 whitespace-nowrap">
             <input
               type="checkbox"
@@ -1161,194 +1158,174 @@ const handleSelectAllItems = useCallback(
               onChange={(e) => handleCheckboxClick(e, account._id)}
             />
           </td>
+
+          {/* Task ID - col1 */}
           <td className="px-6 py-4 whitespace-nowrap">
             <div className="text-sm text-gray-900">{account["col1"] || "—"}</div>
           </td>
-          {/* ↓↓↓ ADD STATUS COLUMN HERE ↓↓↓ */}
+
+          {/* Status */}
           <td className="px-6 py-4 whitespace-nowrap">
-            <span
-              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                isComplete
-                  ? "bg-green-100 text-green-800"
-                  : "bg-yellow-100 text-yellow-800"
-              }`}
-            >
+            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${isComplete ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>
               {account.status}
             </span>
           </td>
-        
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{account["col2"] || "—"}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{account["col3"] || "—"}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{account["col4"] || "—"}</div>
-                            </td>
-                          <td className="px-6 py-4 min-w-[250px]">
-                          <div
-                            className="text-sm text-gray-900 max-w-md whitespace-normal break-words"
-                            title={account["col5"]}
-                          >
-                            {account["col5"] || "—"}
-                          </div>
-                        </td>
-                        {/* NEW ATTACHED FILE COLUMN */}
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {account["col19"] ? (
-                            <a
-                              href={account["col19"]}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 underline"
-                            >
-                              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                              </svg>
-                              View File
-                            </a>
-                          ) : (
-                            <span className="text-sm text-gray-400">—</span>
-                          )}
-                        </td>
-                        <td className={`px-6 py-4 whitespace-nowrap ${!account["col17"] ? "bg-yellow-50" : ""}`}>
-                          <div className="text-sm text-gray-900">{formatDateForDisplay(account["col6"])}</div>
-                        </td>
 
-                            <td className={`px-6 py-4 whitespace-nowrap ${!account["col17"] ? "bg-yellow-50" : ""}`}>
-                              <div className="text-sm text-gray-900">{formatDateForDisplay(account["col6"])}</div>
-                            </td>
-                            <td className={`px-6 py-4 whitespace-nowrap ${!account["col17"] ? "bg-green-50" : ""}`}>
-                              <div className="text-sm text-gray-900">{formatDateForDisplay(account["col10"])}</div>
-                            </td>
-                            <td className={`px-6 py-4 whitespace-nowrap ${!account["col17"] ? "bg-blue-50" : ""}`}>
-                              <select
-                                disabled={!isSelected}
-                                value={statusData[account._id] || ""}
-                                onChange={(e) => handleStatusChange(account._id, e.target.value)}
-                                className="border border-gray-300 rounded-md px-2 py-1 w-full disabled:bg-gray-100 disabled:cursor-not-allowed"
-                              >
-                                <option value="">Select</option>
-                                <option value="Done">Done</option>
-                                <option value="Extend date">Extend date</option>
-                              </select>
-                            </td>
-                            <td className={`px-6 py-4 whitespace-nowrap ${!account["col17"] ? "bg-indigo-50" : ""}`}>
-                              <input
-                                type="date"
-                                disabled={!isSelected || statusData[account._id] !== "Extend date"}
-                                value={
-                                  nextTargetDate[account._id]
-                                    ? (() => {
-                                      const dateStr = nextTargetDate[account._id]
-                                      if (dateStr && dateStr.includes("/")) {
-                                        const [day, month, year] = dateStr.split("/")
-                                        return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
-                                      }
-                                      return dateStr
-                                    })()
-                                    : ""
-                                }
-                                onChange={(e) => {
-                                  const inputDate = e.target.value
-                                  if (inputDate) {
-                                    const [year, month, day] = inputDate.split("-")
-                                    const formattedDate = `${day}/${month}/${year}`
-                                    handleNextTargetDateChange(account._id, formattedDate)
-                                  } else {
-                                    handleNextTargetDateChange(account._id, "")
-                                  }
-                                }}
-                                className="border border-gray-300 rounded-md px-2 py-1 w-full disabled:bg-gray-100 disabled:cursor-not-allowed"
-                              />
-                            </td>
-                            <td className={`px-6 py-4 whitespace-nowrap ${!account["col17"] ? "bg-purple-50" : ""}`}>
-                              <input
-                                type="text"
-                                placeholder="Enter remarks"
-                                disabled={!isSelected}
-                                value={remarksData[account._id] || ""}
-                                onChange={(e) => setRemarksData((prev) => ({ ...prev, [account._id]: e.target.value }))}
-                                className="border rounded-md px-2 py-1 w-full border-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                              />
-                            </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-  {isComplete ? (
-    account.historyImage ? (
-      
-       <a href={account.historyImage}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-600 hover:text-blue-800 underline flex items-center"
-      >
-        <img
-          src={account.historyImage}
-          alt="Attachment"
-          className="h-8 w-8 object-cover rounded-md mr-2"
-        />
-        View
-      </a>
-    ) : (
-      <span className="text-gray-400">No attachment</span>
-    )
-  ) : account.image ? (
-    <div className="flex items-center">
-      <img
-        src={typeof account.image === "string" ? account.image : URL.createObjectURL(account.image)}
-        alt="Receipt"
-        className="h-10 w-10 object-cover rounded-md mr-2"
-      />
-      <div className="flex flex-col">
-        <span className="text-xs text-gray-500">
-          {account.image instanceof File ? account.image.name : "Uploaded Receipt"}
-        </span>
-        {account.image instanceof File ? (
-          <span className="text-xs text-green-600">Ready to upload</span>
-        ) : (
-          <button
-            className="text-xs text-purple-600 hover:text-purple-800"
-            onClick={() => window.open(account.image, "_blank")}
-          >
-            View Full Image
-          </button>
-        )}
-      </div>
-    </div>
+          {/* Department - col2 */}
+          <td className="px-6 py-4 whitespace-nowrap">
+            <div className="text-sm text-gray-900">{account["col2"] || "—"}</div>
+          </td>
+
+          {/* Given By - col3 */}
+          <td className="px-6 py-4 whitespace-nowrap">
+            <div className="text-sm text-gray-900">{account["col3"] || "—"}</div>
+          </td>
+
+          {/* Name - col4 */}
+          <td className="px-6 py-4 whitespace-nowrap">
+            <div className="text-sm text-gray-900">{account["col4"] || "—"}</div>
+          </td>
+
+          {/* Task Description - col5 */}
+          <td className="px-6 py-4 min-w-[250px]">
+            <div className="text-sm text-gray-900 max-w-md whitespace-normal break-words" title={account["col5"]}>
+              {account["col5"] || "—"}
+            </div>
+          </td>
+
+          {/* Attached File - col19 */}
+          <td className="px-6 py-4 whitespace-nowrap">
+            {account["col19"] ? (
+              <a href={account["col19"]} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 underline">
+                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+                View File
+              </a>
+            ) : (
+              <span className="text-sm text-gray-400">—</span>
+            )}
+          </td>
+
+          {/* Task Start Date - col0 (DATE COLUMN) */}
+          <td className={`px-6 py-4 whitespace-nowrap ${!account["col17"] ? "bg-yellow-50" : ""}`}>
+            <div className="text-sm text-gray-900">{formatDateForDisplay(account["col0"])}</div>
+          </td>
+
+          {/* Planned Date - col6 (DATE COLUMN) */}
+          <td className={`px-6 py-4 whitespace-nowrap ${!account["col17"] ? "bg-yellow-50" : ""}`}>
+            <div className="text-sm text-gray-900">{formatDateForDisplay(account["col6"])}</div>
+          </td>
+
+          {/* Action Status - col7 (FIXED: was showing col6) */}
+          <td className={`px-6 py-4 whitespace-nowrap ${!account["col17"] ? "bg-blue-50" : ""}`}>
+            <select
+              disabled={!isSelected}
+              value={statusData[account._id] || ""}
+              onChange={(e) => handleStatusChange(account._id, e.target.value)}
+              className="border border-gray-300 rounded-md px-2 py-1 w-full disabled:bg-gray-100 disabled:cursor-not-allowed"
+            >
+              <option value="">Select</option>
+              <option value="Done">Done</option>
+              <option value="Extend date">Extend date</option>
+            </select>
+          </td>
+
+          {/* Next Target Date - col10 (DATE COLUMN - FIXED: was showing col7) */}
+          <td className={`px-6 py-4 whitespace-nowrap ${!account["col17"] ? "bg-indigo-50" : ""}`}>
+            <input
+              type="date"
+              disabled={!isSelected || statusData[account._id] !== "Extend date"}
+              value={nextTargetDate[account._id] ? (() => {
+                const dateStr = nextTargetDate[account._id];
+                if (dateStr && dateStr.includes("/")) {
+                  const [day, month, year] = dateStr.split("/");
+                  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+                }
+                return dateStr;
+              })() : ""}
+              onChange={(e) => {
+                const inputDate = e.target.value;
+                if (inputDate) {
+                  const [year, month, day] = inputDate.split("-");
+                  const formattedDate = `${day}/${month}/${year}`;
+                  handleNextTargetDateChange(account._id, formattedDate);
+                } else {
+                  handleNextTargetDateChange(account._id, "");
+                }
+              }}
+              className="border border-gray-300 rounded-md px-2 py-1 w-full disabled:bg-gray-100 disabled:cursor-not-allowed"
+            />
+          </td>
+
+          {/* Remarks - col8 (FIXED: was showing col10) */}
+          <td className={`px-6 py-4 whitespace-nowrap ${!account["col17"] ? "bg-purple-50" : ""}`}>
+            <input
+              type="text"
+              placeholder="Enter remarks"
+              disabled={!isSelected}
+              value={remarksData[account._id] || ""}
+              onChange={(e) => setRemarksData(prev => ({ ...prev, [account._id]: e.target.value }))}
+              className="border rounded-md px-2 py-1 w-full border-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            />
+          </td>
+
+          {/* Upload Image - This should show col9 requirement and handle uploads */}
+          <td className="px-6 py-4 whitespace-nowrap">
+            {isComplete ? (
+              account.historyImage ? (
+                <a href={account.historyImage} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline flex items-center">
+                  <img src={account.historyImage} alt="Attachment" className="h-8 w-8 object-cover rounded-md mr-2" />
+                  View
+                </a>
+              ) : (
+                <span className="text-gray-400">No attachment</span>
+              )
+            ) : account.image ? (
+              <div className="flex items-center">
+                <img src={typeof account.image === "string" ? account.image : URL.createObjectURL(account.image)} alt="Receipt" className="h-10 w-10 object-cover rounded-md mr-2" />
+                <div className="flex flex-col">
+                  <span className="text-xs text-gray-500">
+                    {account.image instanceof File ? account.image.name : "Uploaded Receipt"}
+                  </span>
+                  {account.image instanceof File ? (
+                    <span className="text-xs text-green-600">Ready to upload</span>
+                  ) : (
+                    <button className="text-xs text-purple-600 hover:text-purple-800" onClick={() => window.open(account.image, "_blank")}>
+                      View Full Image
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <label className={`flex items-center cursor-pointer ${account["col9"]?.toUpperCase() === "YES" ? "text-red-600 font-medium" : "text-purple-600 hover:text-purple-800"} ${isDisabled ? "pointer-events-none opacity-50" : ""}`}>
+                <Upload className="h-4 w-4 mr-1" />
+                <span className="text-xs">
+                  {account["col9"]?.toUpperCase() === "YES" ? "Required Upload" : "Upload Image"}
+                  {account["col9"]?.toUpperCase() === "YES" && <span className="text-red-500 ml-1">*</span>}
+                </span>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(account._id, e)}
+                  disabled={!isSelected || isDisabled}
+                />
+              </label>
+            )}
+          </td>
+        </tr>
+      )
+    })
   ) : (
-    <label
-      className={`flex items-center cursor-pointer ${
-        account["col9"]?.toUpperCase() === "YES" ? "text-red-600 font-medium" : "text-purple-600"
-      } hover:text-purple-800 ${isDisabled ? "pointer-events-none opacity-50" : ""}`}
-    >
-      <Upload className="h-4 w-4 mr-1" />
-      <span className="text-xs">
-        {account["col9"]?.toUpperCase() === "YES" ? "Required Upload" : "Upload Image"}
-        {account["col9"]?.toUpperCase() === "YES" && <span className="text-red-500 ml-1">*</span>}
-      </span>
-      <input
-        type="file"
-        className="hidden"
-        accept="image/*"
-        onChange={(e) => handleImageUpload(account._id, e)}
-        disabled={!isSelected || isDisabled}
-      />
-    </label>
+    <tr>
+      <td colSpan="14" className="px-6 py-4 text-center text-gray-500">
+        {searchTerm || statusFilter !== "all" ? "No tasks matching your filters" : "No pending tasks found"}
+      </td>
+    </tr>
   )}
-</td>
-                          </tr>
-                        )
-                      })
-                    ) : (
-                     <tr>
-    <td colSpan={14} className="px-6 py-4 text-center text-gray-500">
-    {searchTerm || statusFilter !== "all" 
-      ? "No tasks matching your filters" 
-      : "No pending tasks found"}
-  </td>
-</tr>
-                    )}
-                  </tbody>
+</tbody>
+
                 </table>
               </div>
             )}

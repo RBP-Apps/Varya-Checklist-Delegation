@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { CheckSquare, ClipboardList, Home, LogOut, Menu, Database, ChevronDown, ChevronRight,KeyRound, Video } from 'lucide-react'
+import { CheckSquare, ClipboardList, Home, LogOut, Menu, Database, ChevronDown, ChevronRight,KeyRound, Video,BarChart } from 'lucide-react'
 
 export default function AdminLayout({ children, darkMode, toggleDarkMode }) {
   const location = useLocation()
@@ -95,14 +95,21 @@ export default function AdminLayout({ children, darkMode, toggleDarkMode }) {
       submenu: true,
       showFor: ["admin", "user"] // Show for both roles
     },
+   
+      {
+      href: "/dashboard/scoring",
+      label: "Scoring",
+      icon: BarChart,
+      active: location.pathname === "/dashboard/scoring",
+      showFor: ["admin", "user"] // show both
+    },
     {
       href: "/dashboard/license",
       label: "License",
       icon: KeyRound,
       active: location.pathname === "/dashboard/license",
       showFor: ["admin", "user"] // show both
-    },
-
+      },
     {
       href: "/dashboard/traning-video",
       label: "Training Video",
