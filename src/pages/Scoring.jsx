@@ -222,11 +222,30 @@ function ScoringPage() {
   
 
   const getAchievementStatus = (target, achievement) => {
-    if (achievement >= target) return { status: "Achieved", color: "text-green-600 bg-green-100" }
-    const percentage = target > 0 ? (achievement / target) * 100 : 0
-    if (percentage >= 80) return { status: "Near Target", color: "text-yellow-600 bg-yellow-100" }
-    return { status: "Below Target", color: "text-red-600 bg-red-100" }
+  // If both target and achievement are 0, it means no activity/work done
+  if (target === 0 && achievement === 0) {
+    return { status: "No Activity", color: "text-gray-600 bg-gray-100" }
   }
+  
+  // If target is 0 but achievement is greater than 0, it's unexpected achievement
+  if (target === 0 && achievement > 0) {
+    return { status: "Exceeded", color: "text-green-600 bg-green-100" }
+  }
+  
+  // If target is greater than 0 but achievement is 0, no progress made
+  if (target > 0 && achievement === 0) {
+    return { status: "Not Started", color: "text-red-600 bg-red-100" }
+  }
+  
+  // Normal comparison when both have values
+  if (achievement >= target) return { status: "Achieved", color: "text-green-600 bg-green-100" }
+  
+  const percentage = target > 0 ? (achievement / target) * 100 : 0
+  if (percentage >= 80) return { status: "Near Target", color: "text-yellow-600 bg-yellow-100" }
+  
+  return { status: "Below Target", color: "text-red-600 bg-red-100" }
+}
+
 
   if (loading) {
     return (
@@ -385,7 +404,7 @@ function ScoringPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Rank
+                    S.No
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Name
@@ -419,17 +438,12 @@ function ScoringPage() {
                   performanceMetrics.sortedScores.map((score, index) => {
                     const achievementStatus = getAchievementStatus(score.target, score.achievement)
                     return (
-                      <tr key={score._id} className={index < 3 ? "bg-yellow-50" : "hover:bg-gray-50"}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            {index === 0 && <span className="text-2xl">🥇</span>}
-                            {index === 1 && <span className="text-2xl">🥈</span>}
-                            {index === 2 && <span className="text-2xl">🥉</span>}
-                            {index > 2 && (
-                              <span className="text-sm font-medium text-gray-900">#{index + 1}</span>
-                            )}
-                          </div>
-                        </td>
+                      <tr key={score._id} className="hover:bg-gray-50">
+                         <td className="px-6 py-4 whitespace-nowrap">
+                         <div className="flex items-center">
+                         <span className="text-sm font-medium text-gray-900">{index + 1}</span>
+                             </div>
+                                </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">{score.name}</div>
                         </td>
