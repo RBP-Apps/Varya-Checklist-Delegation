@@ -9,7 +9,7 @@ import AdminLayout from "../../components/layout/AdminLayout"
 const CONFIG = {
   // Google Apps Script URL
   APPS_SCRIPT_URL:
-    "https://script.google.com/macros/s/AKfycbxDEgWct4VVx7Oh81zMxwl1UsvretjqrCy9X7XlOoIqy9LXmGAAIlx-6Wvx3dZha0Xr/exec",
+    "https://script.google.com/macros/s/AKfycby_2rGoYWDROkUQmU7pBQWR_aNjqwn1LjZ5cSYdFtRgxGU9gp9jO29cXUUNpHXeJ6Mj/exec",
 
   // Google Drive folder ID for file uploads
   DRIVE_FOLDER_ID: "1eAqzUds6SFYIJYlYtxB8gVx3QLS8OZaI",

@@ -252,7 +252,7 @@ export default function AdminDashboard() {
       // Debug: Log which sheet we're fetching
       console.log(`Fetching data for dashboard type: ${dashboardType}, sheet: ${sheetName}`);
 
-      const response = await fetch(`https://docs.google.com/spreadsheets/d/1nvU1bQOkLNMwatRSbcTPJd0vhDGeqrhY8gL1s0YWGww/gviz/tq?tqx=out:json&sheet=${sheetName}`);
+      const response = await fetch(`https://docs.google.com/spreadsheets/d/1WIxX_wOaCYeOc96Jhghkv6YEtWrhpM0J7kjoDRZ-fwg/gviz/tq?tqx=out:json&sheet=${sheetName}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch ${sheetName} sheet data: ${response.status}`);

@@ -9,7 +9,7 @@ import AdminLayout from "../components/layout/AdminLayout"
 const CONFIG = {
   // Google Apps Script URL (same as your checklist)
   APPS_SCRIPT_URL:
-    "https://script.google.com/macros/s/AKfycbxDEgWct4VVx7Oh81zMxwl1UsvretjqrCy9X7XlOoIqy9LXmGAAIlx-6Wvx3dZha0Xr/exec",
+    "https://script.google.com/macros/s/AKfycby_2rGoYWDROkUQmU7pBQWR_aNjqwn1LjZ5cSYdFtRgxGU9gp9jO29cXUUNpHXeJ6Mj/exec",
 
   // Sheet name to work with - "Scoring" sheet
   SHEET_NAME: "Scoring",
@@ -30,6 +30,8 @@ function ScoringPage() {
   const [membersList, setMembersList] = useState([])
   const [userRole, setUserRole] = useState("")
   const [username, setUsername] = useState("")
+  const [startDate, setStartDate] = useState("") // Simple date filter
+  const [endDate, setEndDate] = useState("")     // Simple date filter
 
   // Date formatting utilities (consistent with your existing code)
   const formatDateToDDMMYYYY = (date) => {
@@ -74,6 +76,40 @@ function ScoringPage() {
     if (parts.length !== 3) return null
     return new Date(parts[2], parts[1] - 1, parts[0])
   }
+// Convert DD/MM/YYYY to YYYY-MM-DD (for HTML date input)
+const convertToDateInputFormat = (ddmmyyyy) => {
+  if (!ddmmyyyy) return ""
+  const parts = ddmmyyyy.split('/')
+  if (parts.length !== 3) return ""
+  return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
+}
+
+// Convert YYYY-MM-DD (from HTML date input) to DD/MM/YYYY
+const convertFromDateInputFormat = (yyyymmdd) => {
+  if (!yyyymmdd) return ""
+  const parts = yyyymmdd.split('-')
+  if (parts.length !== 3) return ""
+  return `${parts[2]}/${parts[1]}/${parts[0]}`
+}
+
+  
+// Simple date range filter function with DD/MM/YYYY text input format
+const isDateInRange = (dateStr, startDateFilter, endDateFilter) => {
+  if (!startDateFilter && !endDateFilter) return true
+  if (!dateStr) return false
+  
+  const date = parseDateFromDDMMYYYY(dateStr)
+  if (!date) return false
+  
+  // Parse DD/MM/YYYY format from text inputs
+  const start = startDateFilter ? parseDateFromDDMMYYYY(startDateFilter) : null
+  const end = endDateFilter ? parseDateFromDDMMYYYY(endDateFilter) : null
+  
+  if (start && date < start) return false
+  if (end && date > end) return false
+  
+  return true
+}
 
   // Initialize user data from session storage
   useEffect(() => {
@@ -178,6 +214,13 @@ function ScoringPage() {
       filteredData = filteredData.filter(score => score.name === selectedMember)
     }
 
+    // Filter by date range
+    if (startDate || endDate) {
+      filteredData = filteredData.filter(score => 
+        isDateInRange(score.dateStart, startDate, endDate)
+      )
+    }
+
     // Filter by timeframe (current period only shows latest entry per person)
     if (selectedTimeframe === "current") {
       const latestScores = {}
@@ -210,7 +253,7 @@ function ScoringPage() {
       sortedScores,
       filteredData
     }
-  }, [scoringData, selectedTimeframe, selectedMember])
+  }, [scoringData, selectedTimeframe, selectedMember, startDate, endDate])
 
   const getScoreColor = (score) => {
     if (score >= 90) return "text-green-600 bg-green-100"
@@ -218,8 +261,6 @@ function ScoringPage() {
     if (score >= 60) return "text-yellow-600 bg-yellow-100"
     return "text-red-600 bg-red-100"
   }
-
-  
 
   const getAchievementStatus = (target, achievement) => {
   // If both target and achievement are 0, it means no activity/work done
@@ -245,7 +286,6 @@ function ScoringPage() {
   
   return { status: "Below Target", color: "text-red-600 bg-red-100" }
 }
-
 
   if (loading) {
     return (
@@ -316,6 +356,36 @@ function ScoringPage() {
                 <option value="all">All Records</option>
               </select>
             </div>
+
+           <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Start Date
+                    </label>
+                    <input
+                        type="date"
+                        value={convertToDateInputFormat(startDate)}
+                        onChange={(e) => setStartDate(convertFromDateInputFormat(e.target.value))}
+                        className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
+                    />
+                    {startDate && (
+                        <div className="text-xs text-gray-500 mt-1">Selected: {startDate}</div>
+                    )}
+                    </div>
+
+                    <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        End Date
+                    </label>
+                    <input
+                        type="date"
+                        value={convertToDateInputFormat(endDate)}
+                        onChange={(e) => setEndDate(convertFromDateInputFormat(e.target.value))}
+                        className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
+                    />
+                    {endDate && (
+                        <div className="text-xs text-gray-500 mt-1">Selected: {endDate}</div>
+                    )}
+                    </div>
 
             {userRole === "admin" && (
               <div>
