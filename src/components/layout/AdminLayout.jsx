@@ -170,7 +170,7 @@ const getAccessibleRoutes = () => {
       </div>
       <div className="flex flex-col leading-tight">
         {/* Top line: RBP */}
-        <span className="text-lg font-bold text-blue-700">RBP</span>
+        <span className="text-lg font-bold text-blue-700">Varya</span>
         {/* Bottom line: Checklist & Delegation */}
         <span className="text-sm font-medium text-blue-500">Checklist & Delegation</span>
       </div>
