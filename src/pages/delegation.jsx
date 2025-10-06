@@ -8,7 +8,7 @@ import AdminLayout from "../components/layout/AdminLayout"
 const CONFIG = {
   // Google Apps Script URL
   APPS_SCRIPT_URL:
-    "https://script.google.com/macros/s/AKfycby_2rGoYWDROkUQmU7pBQWR_aNjqwn1LjZ5cSYdFtRgxGU9gp9jO29cXUUNpHXeJ6Mj/exec",
+  "https://script.google.com/macros/s/AKfycby_2rGoYWDROkUQmU7pBQWR_aNjqwn1LjZ5cSYdFtRgxGU9gp9jO29cXUUNpHXeJ6Mj/exec",
 
   // Google Drive folder ID for file uploads
   DRIVE_FOLDER_ID: "1sMFpmaqzTAKQRO0Sy7y4qfX8FDzj1GTa",
@@ -18,12 +18,13 @@ const CONFIG = {
   TARGET_SHEET_NAME: "DELEGATION DONE",
 
   // Page configuration
-  PAGE_CONFIG: {
-    title: "DELEGATION Tasks",
-    historyTitle: "DELEGATION Task History",
-    description: "Showing all pending tasks",
-    historyDescription: "Read-only view of completed tasks with submission history",
-  },
+ PAGE_CONFIG: {
+  title: "DELEGATION Tasks",
+  historyTitle: "DELEGATION Task History",
+  description: "Showing both tasks assigned to you and tasks you assign to others",  // ← NEW TEXT
+  historyDescription: "Read-only view of completed tasks with submission history",
+},
+
 }
 
 // Debounce hook for search optimization
@@ -179,7 +180,7 @@ const [statusFilter, setStatusFilter] = useState("all")
 
   const formatDateForDisplay = useCallback(
     (dateStr) => {
-      if (!dateStr) return "—"
+      if (!dateStr) return "-"
 
       // If it's already in proper DD/MM/YYYY format, return as is
       if (typeof dateStr === "string" && dateStr.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
@@ -187,7 +188,7 @@ const [statusFilter, setStatusFilter] = useState("all")
       }
 
       // Try to parse and reformat
-      return parseGoogleSheetsDate(dateStr) || "—"
+      return parseGoogleSheetsDate(dateStr) || "-"
     },
     [parseGoogleSheetsDate],
   )
@@ -451,13 +452,13 @@ const currentUsernameClean = (currentUsername || "").toString().trim()
 
 let isUserMatch = false
 
-if (currentUserRole === "admin") {
-  // Admin: Only Column D (Given By) match
-  isUserMatch = givenByValue.toLowerCase() === currentUsernameClean.toLowerCase()
-} else {
-  // Regular User: Only Column E (Name) match
-  isUserMatch = nameValue.toLowerCase() === currentUsernameClean.toLowerCase()
-}
+// Check if user matches either Column D (Given By) OR Column E (Name)
+// This shows both tasks assigned TO the user and tasks ASSIGNED BY the user
+const givenByMatch = givenByValue.toLowerCase() === currentUsernameClean.toLowerCase()
+const nameMatch = nameValue.toLowerCase() === currentUsernameClean.toLowerCase()
+
+isUserMatch = givenByMatch || nameMatch
+
 
 if (!isUserMatch) return
 
@@ -849,10 +850,11 @@ const handleSelectAllItems = useCallback(
   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <h2 className="text-purple-700 font-medium">
-        {showHistory
-          ? `Completed ${CONFIG.SOURCE_SHEET_NAME} Tasks`
-          : `Pending ${CONFIG.SOURCE_SHEET_NAME} Tasks`}
-      </h2>
+  {showHistory
+    ? `Completed ${CONFIG.SOURCE_SHEET_NAME} Tasks`
+    : `${CONFIG.SOURCE_SHEET_NAME} Tasks - Assigned To Me & Assigned By Me`}  // ← NEW TEXT
+</h2>
+
       <p className="text-purple-600 text-sm">
         {showHistory
           ? `${CONFIG.PAGE_CONFIG.historyDescription} for your tasks`
@@ -982,10 +984,10 @@ const handleSelectAllItems = useCallback(
                         filteredHistoryData.map((history) => (
                           <tr key={history._id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">{history["col0"] || "—"}</div>
+                              <div className="text-sm font-medium text-gray-900">{history["col0"] || "-"}</div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{history["col1"] || "—"}</div>
+                              <div className="text-sm text-gray-900">{history["col1"] || "-"}</div>
                             </td>
 
                             <td className="px-6 py-4 min-w-[250px]">
@@ -993,7 +995,7 @@ const handleSelectAllItems = useCallback(
                               className="text-sm text-gray-900 max-w-md whitespace-normal break-words"
                               title={history["col8"]}
                             >
-                              {history["col8"] || "—"}
+                              {history["col8"] || "-"}
                             </div>
                           </td>
                           {/* NEW ATTACHED FILE COLUMN */}
@@ -1011,7 +1013,7 @@ const handleSelectAllItems = useCallback(
                                 View File
                               </a>
                             ) : (
-                              <span className="text-sm text-gray-400">—</span>
+                              <span className="text-sm text-gray-400">-</span>
                             )}
                           </td>
 
@@ -1024,18 +1026,18 @@ const handleSelectAllItems = useCallback(
                                     : "bg-gray-100 text-gray-800"
                                   }`}
                               >
-                                {history["col2"] || "—"}
+                                {history["col2"] || "-"}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{formatDateForDisplay(history["col3"]) || "—"}</div>
+                              <div className="text-sm text-gray-900">{formatDateForDisplay(history["col3"]) || "-"}</div>
                             </td>
                             <td className="px-6 py-4 bg-purple-50 min-w-[200px]">
                               <div
                                 className="text-sm text-gray-900 max-w-md whitespace-normal break-words"
                                 title={history["col4"]}
                               >
-                                {history["col4"] || "—"}
+                                {history["col4"] || "-"}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -1059,11 +1061,11 @@ const handleSelectAllItems = useCallback(
                             </td>
                             {userRole === "admin" && (
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">{history["col7"] || "—"}</div>
+                                <div className="text-sm text-gray-900">{history["col7"] || "-"}</div>
                               </td>
                             )}
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">{history["col9"] || "—"}</div>
+                              <div className="text-sm text-gray-900">{history["col9"] || "-"}</div>
                             </td>
                           </tr>
                         ))
@@ -1161,7 +1163,7 @@ const handleSelectAllItems = useCallback(
 
           {/* Task ID - col1 */}
           <td className="px-6 py-4 whitespace-nowrap">
-            <div className="text-sm text-gray-900">{account["col1"] || "—"}</div>
+            <div className="text-sm text-gray-900">{account["col1"] || "-"}</div>
           </td>
 
           {/* Status */}
@@ -1173,23 +1175,23 @@ const handleSelectAllItems = useCallback(
 
           {/* Department - col2 */}
           <td className="px-6 py-4 whitespace-nowrap">
-            <div className="text-sm text-gray-900">{account["col2"] || "—"}</div>
+            <div className="text-sm text-gray-900">{account["col2"] || "-"}</div>
           </td>
 
           {/* Given By - col3 */}
           <td className="px-6 py-4 whitespace-nowrap">
-            <div className="text-sm text-gray-900">{account["col3"] || "—"}</div>
+            <div className="text-sm text-gray-900">{account["col3"] || "-"}</div>
           </td>
 
           {/* Name - col4 */}
           <td className="px-6 py-4 whitespace-nowrap">
-            <div className="text-sm text-gray-900">{account["col4"] || "—"}</div>
+            <div className="text-sm text-gray-900">{account["col4"] || "-"}</div>
           </td>
 
           {/* Task Description - col5 */}
           <td className="px-6 py-4 min-w-[250px]">
             <div className="text-sm text-gray-900 max-w-md whitespace-normal break-words" title={account["col5"]}>
-              {account["col5"] || "—"}
+              {account["col5"] || "-"}
             </div>
           </td>
 
@@ -1203,7 +1205,7 @@ const handleSelectAllItems = useCallback(
                 View File
               </a>
             ) : (
-              <span className="text-sm text-gray-400">—</span>
+              <span className="text-sm text-gray-400">No Attachement</span>
             )}
           </td>
 
