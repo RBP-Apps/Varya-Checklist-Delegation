@@ -21,7 +21,7 @@ const CONFIG = {
  PAGE_CONFIG: {
   title: "DELEGATION Tasks",
   historyTitle: "DELEGATION Task History",
-  description: "Showing both tasks assigned to you and tasks you assign to others",  // ← NEW TEXT
+  description: "Showing both tasks assigned to you and tasks you assign to others",  
   historyDescription: "Read-only view of completed tasks with submission history",
 },
 
@@ -852,7 +852,7 @@ const handleSelectAllItems = useCallback(
       <h2 className="text-purple-700 font-medium">
   {showHistory
     ? `Completed ${CONFIG.SOURCE_SHEET_NAME} Tasks`
-    : `${CONFIG.SOURCE_SHEET_NAME} Tasks - Assigned To Me & Assigned By Me`}  // ← NEW TEXT
+    : `${CONFIG.SOURCE_SHEET_NAME} Tasks - Assigned To Me & Assigned By Me`}  
 </h2>
 
       <p className="text-purple-600 text-sm">
