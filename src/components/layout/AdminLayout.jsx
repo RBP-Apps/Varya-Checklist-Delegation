@@ -302,7 +302,7 @@ const getAccessibleRoutes = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <img 
-                  src="/RBP-Logo-PNG.jpeg" 
+                  src="/Varyaa-Logo.jpg" 
                   alt="RBP Logo" 
                   className="h-12 w-12 object-contain"
                 />
@@ -424,9 +424,9 @@ const getAccessibleRoutes = () => {
           <div className="flex md:hidden w-8"></div>
           <div className="flex items-center gap-3">
             <img 
-              src="/RBP-Logo-PNG.jpeg" 
+              src="/Varyaa-Logo.jpg" 
               alt="RBP Logo" 
-              className="h-8 w-8 object-contain"
+              className="h-12 w-12 object-contain"
             />
             <h1 className="text-lg font-semibold text-blue-700">Checklist & Delegation</h1>
           </div>
