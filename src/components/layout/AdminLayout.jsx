@@ -161,16 +161,16 @@ const getAccessibleRoutes = () => {
   <Link to="/dashboard/admin" className="flex items-center gap-2 font-semibold text-blue-700">
     {/* Logo + RBP */}
     <div className="flex items-center gap-2">
-      <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center shadow-md">
+      <div className="h-12 w-12   to-purple-500 flex items-center justify-center shadow-md">
         <img 
-          src="/RBP-Logo-PNG.jpeg" 
+          src="/Varyaa-Logo.jpg" 
           alt="RBP Logo" 
-          className="h-10 w-10 object-contain rounded-full"
+          className="h-15 w-15 object-contain"
         />
       </div>
       <div className="flex flex-col leading-tight">
         {/* Top line: RBP */}
-        <span className="text-lg font-bold text-blue-700">Varya</span>
+        <span className="text-lg font-bold text-blue-700">Varyaa</span>
         {/* Bottom line: Checklist & Delegation */}
         <span className="text-sm font-medium text-blue-500">Checklist & Delegation</span>
       </div>
