@@ -230,7 +230,7 @@ export default function AssignTask() {
     givenBy: sessionStorage.getItem('userFullName') || "",
     doer: [],
     description: "",
-    frequency: "daily",
+    frequency: "one-time",
     enableReminders: true,
     requireAttachment: false,
   });
@@ -936,7 +936,7 @@ const fileToBase64 = (file) => {
         givenBy: sessionStorage.getItem('userFullName') || "",
         doer: [],
         description: "",
-        frequency: "daily",
+        frequency: "one-time",
         enableReminders: true,
         requireAttachment: false
       });
@@ -1446,7 +1446,7 @@ const fileToBase64 = (file) => {
                     givenBy: sessionStorage.getItem('userFullName') || "",
                     doer: [],
                     description: "",
-                    frequency: "daily",
+                    frequency: "One Time (No Recurrence)",
                     enableReminders: true,
                     requireAttachment: false,
                   });

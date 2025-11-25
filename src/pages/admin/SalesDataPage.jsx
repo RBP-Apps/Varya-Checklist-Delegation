@@ -1,8 +1,8 @@
 //Aishwarya Empire Tasks
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
-import { CheckCircle2, Upload, X, Search, History, ArrowLeft } from "lucide-react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
+import { CheckCircle2, Upload, X, Search, History, ArrowLeft, Camera } from "lucide-react"
 import AdminLayout from "../../components/layout/AdminLayout"
 
 // Configuration object - Move all configurations here
@@ -50,6 +50,107 @@ function AccountDataPage() {
   const [nameList, setNameList] = useState([])
   const [selectedGivenBy, setSelectedGivenBy] = useState([])
   const [selectedNames, setSelectedNames] = useState([])
+    const [isCameraOpen, setIsCameraOpen] = useState(false)
+  const [cameraStream, setCameraStream] = useState(null)
+  const [cameraError, setCameraError] = useState(null)
+  const videoRef = useRef(null)
+  const canvasRef = useRef(null)
+  const [isCameraLoading, setIsCameraLoading] = useState(false)
+  const [cameraTargetId, setCameraTargetId] = useState(null)
+  const startCamera = async (id) => {
+    try {
+      setCameraError(null)
+      setIsCameraLoading(true)
+      setCameraTargetId(id)
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setCameraError("Camera not supported on this device")
+        setIsCameraLoading(false)
+        return
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      })
+
+      setCameraStream(stream)
+      setIsCameraOpen(true)
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+      }
+    } catch (error) {
+      if (error.name === "NotAllowedError") {
+        setCameraError("Camera access denied. Please allow camera permissions.")
+      } else if (error.name === "NotFoundError") {
+        setCameraError("No camera found on this device.")
+      } else if (error.name === "NotReadableError") {
+        setCameraError("Camera is being used by another application.")
+      } else {
+        setCameraError(`Unable to access camera: ${error.message}`)
+      }
+    } finally {
+      setIsCameraLoading(false)
+    }
+  }
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop())
+      setCameraStream(null)
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null
+    }
+    setIsCameraOpen(false)
+    setCameraError(null)
+    setIsCameraLoading(false)
+    setCameraTargetId(null)
+  }
+
+  const capturePhoto = async () => {
+    if (!videoRef.current) {
+      alert("Camera not initialized. Please try again.")
+      return
+    }
+    const video = videoRef.current
+    if (video.readyState < 2) {
+      alert("Camera is still loading. Please wait.")
+      return
+    }
+    if (!cameraStream || !cameraStream.active) {
+      alert("Camera stream not active. Please restart camera.")
+      return
+    }
+    const canvas = document.createElement("canvas")
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    const context = canvas.getContext("2d")
+    if (!context) {
+      alert("Failed to create canvas context")
+      return
+    }
+    context.drawImage(video, 0, 0, canvas.width, canvas.height)
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        alert("Failed to capture photo")
+        return
+      }
+      const file = new File([blob], `camera-${Date.now()}.jpg`, { type: "image/jpeg" })
+
+      setAccountData((prev) =>
+        prev.map((item) =>
+          item._id === cameraTargetId ? { ...item, image: file } : item
+        )
+      )
+
+      alert("Photo captured successfully!")
+      stopCamera()
+    }, "image/jpeg", 0.92)
+  }
+
 
   const formatDateToDDMMYYYY = (date) => {
     const day = date.getDate().toString().padStart(2, "0")
@@ -718,51 +819,52 @@ function AccountDataPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <h1 className="text-2xl font-bold tracking-tight text-purple-700">
-            {showHistory ? CONFIG.PAGE_CONFIG.historyTitle : CONFIG.PAGE_CONFIG.title}
-          </h1>
+       <div className="flex flex-wrap justify-between items-center gap-4 sm:gap-0">
+  <h1 className="w-full sm:w-auto text-2xl font-bold tracking-tight text-purple-700 mb-2 sm:mb-0">
+    {showHistory ? CONFIG.PAGE_CONFIG.historyTitle : CONFIG.PAGE_CONFIG.title}
+  </h1>
 
-          <div className="flex space-x-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type="text"
-                placeholder={showHistory ? "Search history..." : "Search tasks..."}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-purple-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              />
-            </div>
+  <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 w-full sm:w-auto">
+    <div className="relative w-full sm:w-64 mb-2 sm:mb-0">
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+      <input
+        type="text"
+        placeholder={showHistory ? "Search history..." : "Search tasks..."}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="pl-10 pr-4 py-2 border border-purple-200 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 w-full"
+      />
+    </div>
 
-            <button
-              onClick={toggleHistory}
-              className="rounded-md bg-gradient-to-r from-blue-500 to-indigo-600 py-2 px-4 text-white hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              {showHistory ? (
-                <div className="flex items-center">
-                  <ArrowLeft className="h-4 w-4 mr-1" />
-                  <span>Back to Tasks</span>
-                </div>
-              ) : (
-                <div className="flex items-center">
-                  <History className="h-4 w-4 mr-1" />
-                  <span>View History</span>
-                </div>
-              )}
-            </button>
-
-            {!showHistory && (
-              <button
-                onClick={handleSubmit}
-                disabled={selectedItemsCount === 0 || isSubmitting}
-                className="rounded-md bg-gradient-to-r from-purple-600 to-pink-600 py-2 px-4 text-white hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? "Processing..." : `Submit Selected (${selectedItemsCount})`}
-              </button>
-            )}
-          </div>
+    <button
+      onClick={toggleHistory}
+      className="rounded-md bg-gradient-to-r from-blue-500 to-indigo-600 py-2 px-4 text-white hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mb-2 sm:mb-0"
+    >
+      {showHistory ? (
+        <div className="flex items-center">
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          <span>Back to Tasks</span>
         </div>
+      ) : (
+        <div className="flex items-center">
+          <History className="h-4 w-4 mr-1" />
+          <span>View History</span>
+        </div>
+      )}
+    </button>
+
+    {!showHistory && (
+      <button
+        onClick={handleSubmit}
+        disabled={selectedItemsCount === 0 || isSubmitting}
+        className="rounded-md bg-gradient-to-r from-purple-600 to-pink-600 py-2 px-4 text-white hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isSubmitting ? "Processing..." : `Submit Selected (${selectedItemsCount})`}
+      </button>
+    )}
+  </div>
+</div>
+
 
         {successMessage && (
           <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center justify-between">
@@ -1365,52 +1467,75 @@ function AccountDataPage() {
                             />
                           </td>
 
-                          {/* Upload Image - (FIXED: Using file upload instead of column data) */}
-                          <td className="px-6 py-4 whitespace-nowrap bg-green-50">
-                            {account.image ? (
-                              <div className="flex items-center">
-                                <img
-                                  src={typeof account.image === "string" ? account.image : URL.createObjectURL(account.image)}
-                                  alt="Receipt"
-                                  className="h-10 w-10 object-cover rounded-md mr-2"
-                                />
-                                <div className="flex flex-col">
-                                  <span className="text-xs text-gray-500">
-                                    {account.image instanceof File ? account.image.name : "Uploaded Receipt"}
-                                  </span>
-                                  {account.image instanceof File ? (
-                                    <span className="text-xs text-green-600">Ready to upload</span>
-                                  ) : (
-                                    <button
-                                      className="text-xs text-purple-600 hover:text-purple-800"
-                                      onClick={() => window.open(account.image, "_blank")}
-                                    >
-                                      View Full Image
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            ) : (
-                              <label
-                                className={`flex items-center cursor-pointer ${
-                                  account["col9"]?.toUpperCase() === "YES" ? "text-red-600 font-medium" : "text-purple-600"
-                                } hover:text-purple-800`}
-                              >
-                                <Upload className="h-4 w-4 mr-1" />
-                                <span className="text-xs">
-                                  {account["col9"]?.toUpperCase() === "YES" ? "Required Upload" : "Upload Receipt Image"}
-                                  {account["col9"]?.toUpperCase() === "YES" && <span className="text-red-500 ml-1">*</span>}
-                                </span>
-                                <input
-                                  type="file"
-                                  className="hidden"
-                                  accept="image/*"
-                                  onChange={(e) => handleImageUpload(account._id, e)}
-                                  disabled={!isSelected}
-                                />
-                              </label>
-                            )}
-                          </td>
+                       {/* Upload Image - live capture + file upload */}
+<td className="px-6 py-4 whitespace-nowrap bg-green-50">
+  {account.image ? (
+    <div className="flex items-center">
+      <img
+        src={typeof account.image === "string" ? account.image : URL.createObjectURL(account.image)}
+        alt="Receipt"
+        className="h-10 w-10 object-cover rounded-md mr-2"
+      />
+      <div className="flex flex-col">
+        <span className="text-xs text-gray-500">
+          {account.image instanceof File ? account.image.name : "Uploaded Receipt"}
+        </span>
+        <div className="flex gap-2 mt-1">
+          {account.image instanceof File ? (
+            <span className="text-xs text-green-600">Ready to upload</span>
+          ) : (
+            <button
+              className="text-xs text-purple-600 hover:text-purple-800"
+              onClick={() => window.open(account.image, "_blank")}
+            >
+              View Full Image
+            </button>
+          )}
+          <button
+            type="button"
+            className="flex items-center text-xs text-blue-600 hover:text-blue-800"
+            disabled={!isSelected}
+            onClick={() => startCamera(account._id)}
+          >
+            <Camera className="h-4 w-4 mr-1" />
+            Capture
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : (
+    <div className="flex flex-col gap-1">
+      <label
+        className={`flex items-center cursor-pointer ${
+          account["col9"]?.toUpperCase() === "YES" ? "text-red-600 font-medium" : "text-purple-600"
+        } hover:text-purple-800`}
+      >
+        <Upload className="h-4 w-4 mr-1" />
+        <span className="text-xs">
+          {account["col9"]?.toUpperCase() === "YES" ? "Required Upload" : "Upload Receipt Image"}
+          {account["col9"]?.toUpperCase() === "YES" && <span className="text-red-500 ml-1">*</span>}
+        </span>
+        <input
+          type="file"
+          className="hidden"
+          accept="image/*"
+          onChange={(e) => handleImageUpload(account._id, e)}
+          disabled={!isSelected}
+        />
+      </label>
+      <button
+        type="button"
+        className="flex items-center text-xs text-blue-600 hover:text-blue-800"
+        disabled={!isSelected}
+        onClick={() => startCamera(account._id)}
+      >
+        <Camera className="h-4 w-4 mr-1" />
+        Capture Live
+      </button>
+    </div>
+  )}
+</td>
+
                         </tr>
                       )
                     })
@@ -1430,6 +1555,51 @@ function AccountDataPage() {
             </>
           )}
         </div>
+        {isCameraOpen && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
+    <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full overflow-hidden">
+      <div className="bg-blue-600 text-white px-4 py-3 flex items-center justify-between">
+        <h3 className="text-lg font-semibold">Take Photo</h3>
+        <button onClick={stopCamera} className="text-white hover:text-gray-200">
+          X
+        </button>
+      </div>
+      <div className="relative bg-black">
+        <video
+          ref={videoRef}
+          className="w-full h-80 object-cover"
+          autoPlay
+          playsInline
+          muted
+        />
+        {isCameraLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent"></div>
+          </div>
+        )}
+        {cameraError && (
+          <div className="p-4 bg-red-100 text-red-700">{cameraError}</div>
+        )}
+      </div>
+      <div className="p-4 bg-gray-50 flex justify-end gap-3">
+        <button
+          onClick={stopCamera}
+          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={capturePhoto}
+          disabled={isCameraLoading}
+          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+        >
+          Capture Photo
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       </div>
     </AdminLayout>
   )
